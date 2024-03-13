@@ -108,7 +108,7 @@
                     snippets.forEach(snippet => {
                         const option = document.createElement('option');
                         option.value = snippet.code;
-                        option.textContent = snippet.description || 'Unnamed snippet';
+                        option.textContent = snippet.id || 'Unnamed snippet';
                         dropdown.appendChild(option);
                     });
                 })
