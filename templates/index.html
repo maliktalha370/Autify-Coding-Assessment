@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Code Generator</title>
+</head>
+<body>
+    <h1>Describe your coding problem:</h1>
+    <form id="codeForm">
+        <textarea id="coding_problem" name="coding_problem" rows="4" cols="50"></textarea>
+        <button type="submit">Generate Code</button>
+    </form>
+    <!-- Where the generated code will be displayed -->
+    <pre id="generatedCode"></pre>
+
+    <!-- Feedback Section, hidden until code is generated -->
+    <div id="feedbackSection" style="display:none;">
+        <h3>Was this code snippet helpful?</h3>
+        <button type="button" id="feedbackYes">Yes</button>
+        <button type="button" id="feedbackNo">No</button>
+        <br>
+        <textarea id="feedbackComments" name="feedback_comments" rows="4" cols="50" placeholder="Additional comments"></textarea>
+        <br>
+        <button type="button" id="submitFeedback">Submit Feedback</button>
+    </div>
+
+    <!-- DropDown for snippet selection -->
+    <h2>Select a Snippet:</h2>
+    <select id="snippetDropdown">
+        <option value="">--Please select a snippet--</option>
+    </select>
+    <pre id="selectedSnippetCode"></pre>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let feedbackValue = ''; // Will hold 'Yes' or 'No', based on user click
+
+            document.getElementById('feedbackYes').addEventListener('click', function() {
+                feedbackValue = 'Yes';
+            });
+            document.getElementById('feedbackNo').addEventListener('click', function() {
+                feedbackValue = 'No';
+            });
+
+            // Handle code generation form submission
+            document.getElementById('codeForm').addEventListener('submit', function(e) {
+                e.preventDefault(); // Prevent form from submitting traditionally
+                const codingProblem = document.getElementById('coding_problem').value;
+
+                // Send input to server for processing
+                fetch('/generate-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({coding_problem: codingProblem})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('generatedCode').textContent = data.code || 'Error in code generation.';
+                    // Show the feedback section when code is generated
+                    document.getElementById('feedbackSection').style.display = 'block';
+                    document.getElementById('coding_problem').value = ''; // Optionally clear the input
+                })
+                .catch(error => {
+                    console.error('Error generating code:', error);
+                    document.getElementById('generatedCode').textContent = 'Failed to generate code.';
+                });
+
+                // Update dropdown list with new data each time a new code is generated
+                updateSnippetDropdown();
+            });
+
+            // Handle feedback submission
+            document.getElementById('submitFeedback').addEventListener('click', function() {
+                const feedback = {
+                    helpful: feedbackValue,
+                    comments: document.getElementById('feedbackComments').value,
+                };
+
+                fetch('/submit-feedback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(feedback),
+                })
+                .then((response) => {
+                    if (response.ok) {
+                        alert('Thank you for your feedback!');
+                        // Reset feedback form and hide section
+                        document.getElementById('feedbackSection').style.display = 'none';
+                        document.getElementById('feedbackComments').value = ''; // Clear comments
+                        feedbackValue = ''; // Reset feedback value
+                    }
+                }).catch(error => {
+                    console.error('Error submitting feedback:', error);
+                });
+            });
+
+            // Updates the snippet dropdown with available generated codes
+            function updateSnippetDropdown() {
+                // Assume '/snippets' endpoint returns an array of snippets
+                fetch('/snippets')
+                .then(response => response.json())
+                .then(snippets => {
+                    const dropdown = document.getElementById('snippetDropdown');
+                    dropdown.innerHTML = '<option value="">--Please select a snippet--</option>';
+                    snippets.forEach(snippet => {
+                        const option = document.createElement('option');
+                        option.value = snippet.code;
+                        option.textContent = snippet.description || 'Unnamed snippet';
+                        dropdown.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching snippets:', error));
+            }
+
+            document.getElementById('snippetDropdown').addEventListener('change', function() {
+                document.getElementById('selectedSnippetCode').textContent = this.value;
+            });
+
+            // Initial call to populate snippets if any exist at page load
+            updateSnippetDropdown();
+        });
+    </script>
+</body>
+</html>

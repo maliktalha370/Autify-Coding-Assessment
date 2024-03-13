@@ -1,0 +1,5 @@
+Flask
+openai==1.13.3
+transformers==4.38.2
+db-sqlite3
+
