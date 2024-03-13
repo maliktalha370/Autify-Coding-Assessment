@@ -11,11 +11,12 @@ Welcome to our GPT-Turbo 3.5-powered code generation solution. This tool is desi
 - **Responsive Web Interface**: Easily interact with the code generation tool through a streamlined web interface.
 - **Persistent Storage of Feedback**: User feedback is stored in a SQLite database for later analysis and enhancement purposes.
 - **Snippet Management**: Snippets are stored in in-memory data structure where User can see previously generated snippets in a dropdown.
-
+- **Prompt Security**: Restricted code on doing any other task other than code generation using prompt engineering. Provided examples
+in the prompt along with checked prompt on its length and any other keyword for avoiding prompt injection attack.
 
 ## Structure
 
-The assignment is comprised of several key files:
+The assignment comprises several key files:
 
 - `app.py`: The Flask application server handling web requests and integrating with the GPT-3.5-Turbo API for code generation.
 - `templates/index.html`: A basic HTML template for the user interface.
